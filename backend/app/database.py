@@ -145,13 +145,23 @@ class LocalJsonMongoCollection:
 # Global collection references
 users_collection = None
 documents_collection = None
+sessions_collection = None
 using_mock_db = False
 
 async def init_database():
-    global users_collection, documents_collection, using_mock_db
+    global users_collection, documents_collection, sessions_collection, using_mock_db
     try:
         from motor.motor_asyncio import AsyncIOMotorClient
-        client = AsyncIOMotorClient(settings.MONGODB_URL, serverSelectionTimeoutMS=1000)
+        import certifi
+
+        is_atlas = "mongodb+srv" in settings.MONGODB_URL or "mongodb.net" in settings.MONGODB_URL
+        client_kwargs = {
+            "serverSelectionTimeoutMS": 10000 if is_atlas else 1000,
+        }
+        if is_atlas:
+            client_kwargs["tlsCAFile"] = certifi.where()
+
+        client = AsyncIOMotorClient(settings.MONGODB_URL, **client_kwargs)
         await client.admin.command("ping")
         db = client[settings.MONGODB_DB_NAME]
         
@@ -161,6 +171,10 @@ async def init_database():
         documents_collection = db["documents"]
         await documents_collection.create_index("file_id", unique=True)
         await documents_collection.create_index("user_id")
+
+        sessions_collection = db["sessions"]
+        await sessions_collection.create_index("session_id", unique=True)
+        await sessions_collection.create_index("user_id")
         
         using_mock_db = False
         logger.info(f"Connected to live MongoDB at {settings.MONGODB_URL} (db: {settings.MONGODB_DB_NAME})")
@@ -168,6 +182,7 @@ async def init_database():
         logger.warning(f"MongoDB not available ({e}). Falling back to local Mongo-compatible JSON repository.")
         users_collection = LocalJsonMongoCollection("users_local_db.json")
         documents_collection = LocalJsonMongoCollection("documents_local_db.json")
+        sessions_collection = LocalJsonMongoCollection("sessions_local_db.json")
         using_mock_db = True
 
 def get_users_collection():
@@ -181,3 +196,9 @@ def get_documents_collection():
     if documents_collection is None:
         documents_collection = LocalJsonMongoCollection("documents_local_db.json")
     return documents_collection
+
+def get_sessions_collection():
+    global sessions_collection
+    if sessions_collection is None:
+        sessions_collection = LocalJsonMongoCollection("sessions_local_db.json")
+    return sessions_collection

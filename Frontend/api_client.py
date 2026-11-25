@@ -138,11 +138,12 @@ class ApiClient:
         notes_text: Optional[str] = None,
         topic: Optional[str] = None,
         mode: str = "both",
+        quiz_question_count: int = 5,
         token: Optional[str] = None,
     ) -> Tuple[bool, str, Optional[dict]]:
         """
         Calls /api/ai/generate to analyze material with Gemini AI and produce
-        both a 30-minute exam summary and a 5-minute timed quiz.
+        both a 30-minute exam summary and a timed quiz with the selected number of questions.
         """
         url = f"{self.host}/api/ai/generate"
         headers = {}
@@ -154,6 +155,7 @@ class ApiClient:
             "notes_text": notes_text,
             "topic": topic,
             "mode": mode,
+            "quiz_question_count": quiz_question_count,
         }
         try:
             # AI generation takes 3-15 seconds depending on document length
@@ -173,6 +175,29 @@ class ApiClient:
             return False, "AI generation timed out. The server is still processing.", None
         except Exception as e:
             return False, f"AI generation error: {str(e)}", None
+
+    async def create_mega_quiz(
+        self,
+        session_ids: List[str],
+        title: Optional[str] = None,
+        token: Optional[str] = None,
+    ) -> Tuple[bool, str, Optional[dict]]:
+        """
+        Calls /api/ai/quiz/mega to aggregate multiple past study sessions into a single Mega Quiz.
+        """
+        url = f"{self.host}/api/ai/quiz/mega"
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        payload = {"session_ids": session_ids, "title": title}
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(url, json=payload, headers=headers)
+                data = resp.json()
+                if resp.status_code == 200:
+                    return True, data.get("message", "Mega Quiz created!"), data
+                detail = data.get("detail", "Failed to create Mega Quiz.")
+                return False, str(detail), None
+        except Exception as e:
+            return False, f"Mega Quiz error: {str(e)}", None
 
     async def get_study_session(self, session_id: str, token: Optional[str] = None) -> Tuple[bool, str, Optional[dict]]:
         """Retrieves an existing study session by ID."""
@@ -213,6 +238,113 @@ class ApiClient:
                 if response.status_code == 200:
                     return True, data.get("message", "Quiz scored!"), data
                 return False, data.get("detail", "Quiz submission failed"), None
+        except Exception as e:
+            return False, str(e), None
+
+    # ── Study History ───────────────────────────────────────────────
+    async def get_history(self, token: str) -> Tuple[bool, str, List[dict]]:
+        """
+        Retrieves all previous study sessions for the authenticated user, newest first.
+        Returns: (success, message, history_items)
+        """
+        url = f"{self.host}/api/history"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(url, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    return True, data.get("message", "History loaded"), data.get("history", [])
+                detail = response.json().get("detail", "Failed to fetch history")
+                return False, str(detail), []
+        except httpx.ConnectError:
+            return False, "Cannot connect to FastAPI backend at http://127.0.0.1:8000.", []
+        except Exception as e:
+            return False, f"History error: {str(e)}", []
+
+    async def get_history_item(self, history_id: str, token: str) -> Tuple[bool, str, Optional[dict]]:
+        """Retrieves a single study history record by ID."""
+        url = f"{self.host}/api/history/{history_id}"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.get(url, headers=headers)
+                if response.status_code == 200:
+                    return True, "Loaded", response.json()
+                detail = response.json().get("detail", "History item not found")
+                return False, str(detail), None
+        except Exception as e:
+            return False, str(e), None
+
+    async def delete_history_item(self, history_id: str, token: str) -> Tuple[bool, str]:
+        """
+        Deletes a specific history record for the authenticated user.
+        Returns: (success, message)
+        """
+        url = f"{self.host}/api/history/{history_id}"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.delete(url, headers=headers)
+                if response.status_code == 200:
+                    data = response.json()
+                    return True, data.get("message", "History record deleted successfully.")
+                detail = response.json().get("detail", "Failed to delete history record.")
+                return False, str(detail)
+        except Exception as e:
+            return False, f"Delete error: {str(e)}"
+
+    # ── SSLCommerz Sandbox Payment Gateway ──────────────────────────
+    async def get_payment_quote(self, token: str) -> Tuple[bool, str, Optional[dict]]:
+        """Fetches pricing quote for StudyBuddy Pro including dynamic 5% Scholar discount if XP > 250."""
+        url = f"{self.host}/api/payment/quote"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(url, headers=headers)
+                if resp.status_code == 200:
+                    return True, "Quote loaded", resp.json()
+                return False, resp.json().get("detail", "Failed to fetch pricing quote"), None
+        except Exception as e:
+            return False, str(e), None
+
+    async def initiate_payment(self, token: str, cus_phone: str = "01711111111") -> Tuple[bool, str, Optional[dict]]:
+        """Initializes SSLCommerz Sandbox payment session and returns Gateway URL."""
+        url = f"{self.host}/api/payment/initiate"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(url, json={"cus_phone": cus_phone}, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    return True, data.get("message", "Payment session created"), data
+                return False, resp.json().get("detail", "Failed to initiate payment"), None
+        except Exception as e:
+            return False, str(e), None
+
+    async def get_payment_status(self, token: str, transaction_id: str) -> Tuple[bool, str, Optional[dict]]:
+        """Checks the status of an active transaction and whether the user is now Pro."""
+        url = f"{self.host}/api/payment/status/{transaction_id}"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.get(url, headers=headers)
+                if resp.status_code == 200:
+                    return True, "Status retrieved", resp.json()
+                return False, resp.json().get("detail", "Failed to get payment status"), None
+        except Exception as e:
+            return False, str(e), None
+
+    async def simulate_payment_success(self, token: str, transaction_id: str) -> Tuple[bool, str, Optional[dict]]:
+        """Simulates instant sandbox payment completion for quick in-app demos."""
+        url = f"{self.host}/api/payment/simulate-success/{transaction_id}"
+        headers = {"Authorization": f"Bearer {token}"}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                resp = await client.post(url, headers=headers)
+                if resp.status_code == 200:
+                    return True, "Payment simulated successfully", resp.json()
+                return False, resp.json().get("detail", "Failed to simulate payment"), None
         except Exception as e:
             return False, str(e), None
 

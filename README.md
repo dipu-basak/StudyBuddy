@@ -16,7 +16,7 @@
 [![Gemini AI](https://img.shields.io/badge/Google%20Gemini-GenAI%20SDK-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 [![SSLCommerz](https://img.shields.io/badge/SSLCommerz-Sandbox%20Ready-F59E0B?style=for-the-badge)](https://developer.sslcommerz.com/)
 
-[Features](#-key-features) • [Architecture](#%EF%B8%8F-architecture) • [Quick Start](#-quick-start) • [Configuration](#%EF%B8%8F-environment-variables) • [API Reference](#-api-reference) • [Payment Sandbox](#-sslcommerz-sandbox--monitoring)
+[Features](#-key-features) • [Architecture](#%EF%B8%8F-architecture) • [Quick Start](#-quick-start) • [API Reference](#-api-reference) • [Payment Sandbox](#-sslcommerz-sandbox--monitoring)
 
 </div>
 
@@ -209,26 +209,6 @@ uvicorn app.main:app --port 8000 --reload
 cd 2nd_phase/frontend
 python main.py
 ```
-
----
-
-## ⚙️ Environment Variables
-
-All configuration options are loaded in `2nd_phase/backend/app/config.py`:
-
-| Variable | Default | Description |
-| :--- | :--- | :--- |
-| `GEMINI_API_KEY` | `""` *(Required for AI)* | Google Gemini API key used by `google-genai`. |
-| `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Gemini model ID for summary and quiz generation. |
-| `MONGODB_URL` | `mongodb://localhost:27017` | MongoDB connection string (falls back to local JSON if unreachable). |
-| `MONGODB_DB_NAME` | `exam_prep_ai` | Target MongoDB database name. |
-| `JWT_SECRET` | *(dev default in `config.py`)* | Secret key for signing HS256 JWT tokens (override in production). |
-| `UPLOAD_DIR` | `2nd_phase/backend/uploads` | Directory where validated user uploads are stored. |
-| `BACKEND_BASE_URL` | `http://127.0.0.1:8000` | Base callback URL for SSLCommerz success/fail/cancel/IPN routes. |
-| `SSLCOMMERZ_STORE_ID` | `study6742d87e35b71` | SSLCommerz developer sandbox store ID. |
-| `SSLCOMMERZ_STORE_PASSWD` | *(sandbox default)* | SSLCommerz developer sandbox store password. |
-| `SSLCOMMERZ_IS_SANDBOX` | `True` | Enables SSLCommerz sandbox gateway routing and mock checkout fallback. |
-| `PRO_BASE_PRICE_BDT` | `499.0` | Base price in BDT for StudyBuddy Pro before XP discount. |
 
 ---
 

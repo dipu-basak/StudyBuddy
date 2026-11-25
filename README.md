@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="160" height="160" alt="Untitled design (2)" src="https://github.com/user-attachments/assets/bcab3864-c82b-4448-9090-b7c0a5ed20e9" />
+  <img width="170" height="170" alt="Untitled design (2)" src="https://github.com/user-attachments/assets/bcab3864-c82b-4448-9090-b7c0a5ed20e9" />
 </p>
 
 
@@ -18,6 +18,62 @@
 
 [Features](#-key-features) • [Architecture](#%EF%B8%8F-architecture) • [Quick Start](#-quick-start) • [Configuration](#%EF%B8%8F-environment-variables) • [API Reference](#-api-reference) • [Payment Sandbox](#-sslcommerz-sandbox--monitoring)
 
+</div>
+
+---
+
+## 📘 About Us
+
+StudyBuddy is an AI-powered exam preparation platform built to help students turn dense lecture slides, PDFs, and raw class notes into clear, focused study material in seconds.
+
+---
+
+## 🚩 Our Mission
+
+Exam preparation shouldn't mean spending hours drowning in unorganized pages. Our goal is to make studying faster, smarter, and more engaging by pairing concise 30-minute AI study guides with active-recall timed practice quizzes.
+
+---
+
+## 👥 Development Team
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="33.33%">
+      <a href="https://github.com/Shadow-ranger01">
+        <img src="https://github.com/Shadow-ranger01.png?size=120" width="100" style="border-radius: 50%;" alt="Shadow-ranger01" />
+        <br />
+        <sub><b>Rafi </b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/Shadow-ranger01">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat&logo=github" alt="GitHub" />
+      </a>
+    </td>
+    <td align="center" width="33.33%">
+      <a href="https://github.com/Oyshikee-Chakrabarty">
+        <img src="https://github.com/Oyshikee-Chakrabarty.png?size=120" width="100" style="border-radius: 50%;" alt="Oyshikee Chakrabarty" />
+        <br />
+        <sub><b>Oyshikee </b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/Oyshikee-Chakrabarty">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat&logo=github" alt="GitHub" />
+      </a>
+    </td>
+    <td align="center" width="33.33%">
+      <a href="https://github.com/dipu-basak">
+        <img src="https://github.com/dipu-basak.png?size=120" width="100" style="border-radius: 50%;" alt="Dipu Basak" />
+        <br />
+        <sub><b>Dipu </b></sub>
+      </a>
+      <br />
+      <a href="https://github.com/dipu-basak">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat&logo=github" alt="GitHub" />
+      </a>
+    </td>
+  </tr>
+</table>
 </div>
 
 ---

@@ -5,7 +5,7 @@
 
 <div align="center">
 
-# ⚡ StudyBuddy — Exam Prep AI
+# StudyBuddy - Exam Prep AI
 
 **Turn dense lecture slides, PDFs, and raw notes into structured 30-minute study guides and timed practice quizzes.**
 
